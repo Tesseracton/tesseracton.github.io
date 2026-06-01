@@ -9,4 +9,3 @@ The hard part of AI isn't the model — it's everything around it. Data that's n
 
 Tesseracton is a senior team of engineers and strategists who have shipped machine learning and large-language-model systems in production. We don't hand you a deck and leave. **We build alongside you**, transfer the knowledge, and make sure your team can run it long after we're gone.
 
-Our name is a nod to the tesseract — a way of seeing structure in a dimension most people can't. That's the lens we bring to your hardest problems.
