@@ -1,0 +1,315 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getCollection, render } from 'astro:content';
+
+// Load every section markdown file, sort by `order`, and pre-render its body.
+const entries = (await getCollection('sections')).sort(
+  (a, b) => a.data.order - b.data.order,
+);
+
+const sections = await Promise.all(
+  entries.map(async (entry) => ({
+    data: entry.data,
+    Content: (await render(entry)).Content,
+  })),
+);
+
+const bySection = (id: string) => sections.find((s) => s.data.section === id);
+
+const hero = bySection('hero');
+const about = bySection('about');
+const services = bySection('services');
+const approach = bySection('approach');
+const contact = bySection('contact');
+
+const navLinks = [
+  { label: 'About', href: '#about' },
+  { label: 'Services', href: '#services' },
+  { label: 'Approach', href: '#approach' },
+  { label: 'Contact', href: '#contact' },
+];
+const year = new Date().getFullYear();
+---
+
+<Layout>
+  <!-- Ambient gradient backdrop -->
+  <div
+    aria-hidden="true"
+    class="pointer-events-none fixed inset-0 -z-10 overflow-hidden"
+  >
+    <div
+      class="absolute -top-40 left-1/2 h-[40rem] w-[40rem] -translate-x-1/2 rounded-full blur-3xl"
+      style="background: radial-gradient(circle, rgba(99,102,241,0.18), transparent 65%);"
+    >
+    </div>
+    <div
+      class="absolute top-1/3 -right-40 h-[32rem] w-[32rem] rounded-full blur-3xl"
+      style="background: radial-gradient(circle, rgba(168,85,247,0.14), transparent 65%);"
+    >
+    </div>
+    <div
+      class="absolute bottom-0 -left-40 h-[32rem] w-[32rem] rounded-full blur-3xl"
+      style="background: radial-gradient(circle, rgba(34,211,238,0.12), transparent 65%);"
+    >
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header
+    class="sticky top-0 z-50 border-b border-white/5 bg-[var(--color-ink)]/70 backdrop-blur-md"
+  >
+    <nav
+      class="mx-auto flex max-w-6xl items-center justify-between px-6 py-4"
+    >
+      <a href="#top" class="flex items-center gap-3">
+        <img
+          src="/tesseracton-icon.svg"
+          alt="Tesseracton"
+          width="36"
+          height="36"
+          class="h-9 w-9"
+        />
+        <span class="text-lg font-bold tracking-tight text-white"
+          >Tesseracton<span class="text-[var(--color-indigo)]">.ai</span></span
+        >
+      </a>
+      <div class="hidden items-center gap-8 md:flex">
+        {
+          navLinks.map((link) => (
+            <a
+              href={link.href}
+              class="text-sm font-medium text-[var(--color-mist)] transition-colors hover:text-white"
+            >
+              {link.label}
+            </a>
+          ))
+        }
+      </div>
+      <a
+        href="#contact"
+        class="rounded-full bg-white px-4 py-2 text-sm font-semibold text-[var(--color-ink)] transition-transform hover:scale-105"
+        >Get in touch</a
+      >
+    </nav>
+  </header>
+
+  <main id="top">
+    <!-- Hero -->
+    {
+      hero && (
+        <section class="mx-auto max-w-6xl px-6 pt-20 pb-24 md:pt-28 md:pb-32">
+          <div class="max-w-3xl">
+            {hero.data.eyebrow && (
+              <p class="mb-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs font-semibold tracking-widest text-[var(--color-mist)] uppercase">
+                <span class="h-1.5 w-1.5 rounded-full bg-[var(--color-cyan)]" />
+                {hero.data.eyebrow}
+              </p>
+            )}
+            <h1 class="text-4xl leading-[1.1] font-extrabold tracking-tight text-white sm:text-5xl md:text-6xl">
+              {hero.data.title}
+            </h1>
+            {hero.data.subtitle && (
+              <p class="mt-6 text-lg text-[var(--color-mist)] md:text-xl">
+                {hero.data.subtitle}
+              </p>
+            )}
+            <div class="prose-body mt-6 max-w-2xl text-[var(--color-mist)]">
+              <hero.Content />
+            </div>
+            <div class="mt-10 flex flex-wrap gap-4">
+              {hero.data.cta && (
+                <a
+                  href={hero.data.cta.href}
+                  class="rounded-full bg-gradient-to-r from-[var(--color-cyan)] via-[var(--color-indigo)] to-[var(--color-violet)] px-7 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-500/20 transition-transform hover:scale-105"
+                >
+                  {hero.data.cta.label}
+                </a>
+              )}
+              {hero.data.secondaryCta && (
+                <a
+                  href={hero.data.secondaryCta.href}
+                  class="rounded-full border border-white/15 px-7 py-3 text-sm font-semibold text-white transition-colors hover:border-white/40"
+                >
+                  {hero.data.secondaryCta.label}
+                </a>
+              )}
+            </div>
+          </div>
+        </section>
+      )
+    }
+
+    <!-- About -->
+    {
+      about && (
+        <section id="about" class="scroll-mt-20 border-t border-white/5 py-24">
+          <div class="mx-auto grid max-w-6xl gap-12 px-6 md:grid-cols-[1fr_1.6fr]">
+            <div>
+              {about.data.eyebrow && (
+                <p class="text-sm font-semibold tracking-widest text-[var(--color-cyan)] uppercase">
+                  {about.data.eyebrow}
+                </p>
+              )}
+              {about.data.title && (
+                <h2 class="mt-3 text-3xl font-bold tracking-tight text-white md:text-4xl">
+                  {about.data.title}
+                </h2>
+              )}
+            </div>
+            <div class="prose-body text-[var(--color-mist)]">
+              <about.Content />
+            </div>
+          </div>
+        </section>
+      )
+    }
+
+    <!-- Services -->
+    {
+      services && (
+        <section id="services" class="scroll-mt-20 border-t border-white/5 py-24">
+          <div class="mx-auto max-w-6xl px-6">
+            <div class="max-w-2xl">
+              {services.data.eyebrow && (
+                <p class="text-sm font-semibold tracking-widest text-[var(--color-cyan)] uppercase">
+                  {services.data.eyebrow}
+                </p>
+              )}
+              {services.data.title && (
+                <h2 class="mt-3 text-3xl font-bold tracking-tight text-white md:text-4xl">
+                  {services.data.title}
+                </h2>
+              )}
+              {services.data.subtitle && (
+                <p class="mt-4 text-lg text-[var(--color-mist)]">
+                  {services.data.subtitle}
+                </p>
+              )}
+            </div>
+            <div class="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {services.data.items?.map((item) => (
+                <div class="panel rounded-2xl p-6 transition-colors">
+                  <h3 class="text-lg font-semibold text-white">{item.title}</h3>
+                  <p class="mt-3 text-sm leading-relaxed text-[var(--color-mist)]">
+                    {item.body}
+                  </p>
+                </div>
+              ))}
+            </div>
+            <div class="prose-body mt-10 max-w-2xl text-[var(--color-mist)]">
+              <services.Content />
+            </div>
+          </div>
+        </section>
+      )
+    }
+
+    <!-- Approach -->
+    {
+      approach && (
+        <section id="approach" class="scroll-mt-20 border-t border-white/5 py-24">
+          <div class="mx-auto max-w-6xl px-6">
+            <div class="max-w-2xl">
+              {approach.data.eyebrow && (
+                <p class="text-sm font-semibold tracking-widest text-[var(--color-cyan)] uppercase">
+                  {approach.data.eyebrow}
+                </p>
+              )}
+              {approach.data.title && (
+                <h2 class="mt-3 text-3xl font-bold tracking-tight text-white md:text-4xl">
+                  {approach.data.title}
+                </h2>
+              )}
+              {approach.data.subtitle && (
+                <p class="mt-4 text-lg text-[var(--color-mist)]">
+                  {approach.data.subtitle}
+                </p>
+              )}
+            </div>
+            <ol class="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+              {approach.data.items?.map((item) => (
+                <li class="panel rounded-2xl p-6 transition-colors">
+                  <h3 class="text-gradient text-sm font-bold tracking-wider">
+                    {item.title}
+                  </h3>
+                  <p class="mt-3 text-sm leading-relaxed text-[var(--color-mist)]">
+                    {item.body}
+                  </p>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </section>
+      )
+    }
+
+    <!-- Contact -->
+    {
+      contact && (
+        <section id="contact" class="scroll-mt-20 border-t border-white/5 py-24">
+          <div class="mx-auto max-w-4xl px-6">
+            <div class="panel relative overflow-hidden rounded-3xl px-8 py-14 text-center md:px-16">
+              {contact.data.eyebrow && (
+                <p class="text-sm font-semibold tracking-widest text-[var(--color-cyan)] uppercase">
+                  {contact.data.eyebrow}
+                </p>
+              )}
+              {contact.data.title && (
+                <h2 class="mt-3 text-3xl font-bold tracking-tight text-white md:text-4xl">
+                  {contact.data.title}
+                </h2>
+              )}
+              <div class="prose-body mx-auto mt-5 max-w-xl text-[var(--color-mist)] [&_p]:mx-auto">
+                <contact.Content />
+              </div>
+              {contact.data.cta && (
+                <a
+                  href={contact.data.cta.href}
+                  class="mt-8 inline-block rounded-full bg-gradient-to-r from-[var(--color-cyan)] via-[var(--color-indigo)] to-[var(--color-violet)] px-8 py-3.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/20 transition-transform hover:scale-105"
+                >
+                  {contact.data.cta.label}
+                </a>
+              )}
+              {contact.data.email && (
+                <p class="mt-5 text-sm text-[var(--color-mist)]">
+                  or email{' '}
+                  <a
+                    href={`mailto:${contact.data.email}`}
+                    class="text-[var(--color-cyan)] underline underline-offset-4"
+                  >
+                    {contact.data.email}
+                  </a>
+                </p>
+              )}
+            </div>
+          </div>
+        </section>
+      )
+    }
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-white/5 py-10">
+    <div
+      class="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-6 sm:flex-row"
+    >
+      <div class="flex items-center gap-3">
+        <img
+          src="/tesseracton-icon.svg"
+          alt=""
+          width="28"
+          height="28"
+          class="h-7 w-7 opacity-80"
+        />
+        <span class="text-sm text-[var(--color-mist)]"
+          >&copy; {year} Tesseracton.ai — AI Consultancy</span
+        >
+      </div>
+      <a
+        href="#contact"
+        class="text-sm font-medium text-[var(--color-mist)] transition-colors hover:text-white"
+        >hello@tesseracton.ai</a
+      >
+    </div>
+  </footer>
+</Layout>

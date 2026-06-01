@@ -1,0 +1,65 @@
+@import "tailwindcss";
+
+/* Brand theme tokens — derived from the tesseract logo gradient. */
+@theme {
+  --color-ink: #05060d;
+  --color-ink-soft: #0b0d1a;
+  --color-panel: #11132a;
+  --color-cyan: #22d3ee;
+  --color-indigo: #6366f1;
+  --color-violet: #a855f7;
+  --color-mist: #94a3b8;
+
+  --font-sans: "Inter", "Helvetica Neue", Arial, sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--color-ink);
+  color: #e2e8f0;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Reusable gradient text + surfaces */
+.text-gradient {
+  background-image: linear-gradient(100deg, var(--color-cyan), var(--color-indigo) 55%, var(--color-violet));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.panel {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01));
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  backdrop-filter: blur(6px);
+}
+
+.panel:hover {
+  border-color: rgba(99, 102, 241, 0.5);
+}
+
+/* Render-from-markdown prose tweaks */
+.prose-body :where(p) {
+  margin-bottom: 1rem;
+  line-height: 1.75;
+}
+.prose-body :where(strong) {
+  color: #fff;
+  font-weight: 600;
+}
+.prose-body :where(a) {
+  color: var(--color-cyan);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.prose-body :where(ul) {
+  margin: 1rem 0;
+  padding-left: 1.25rem;
+  list-style: disc;
+}
+.prose-body :where(li) {
+  margin-bottom: 0.4rem;
+}
