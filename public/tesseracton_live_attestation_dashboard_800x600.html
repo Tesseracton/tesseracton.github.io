@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=800, initial-scale=1" />
+<title>Tesseracton Live Attestation Dashboard</title>
+<style>
+  :root{
+    --bg:#020915;
+    --bg2:#050f1f;
+    --panel:#071222;
+    --line:#14253b;
+    --line2:#21324c;
+    --text:#d7e7fb;
+    --muted:#87a1c2;
+    --link:#9dbbff;
+    --green:#7ef0a7;
+    --green-bg:#0d4027;
+    --amber:#f4a640;
+    --amber-bg:#231708;
+    --blue-btn:#23354f;
+    --blue-btn2:#2c4667;
+    --row:#0a1629;
+    --row-hi:#16233a;
+    --border:#1a2d45;
+    --red:#ff6f7a;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;width:800px;height:600px;background:var(--bg);overflow:hidden}
+  body{
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    color:var(--text);
+    font-size:11px;
+    line-height:1.25;
+  }
+  a{color:var(--link);text-decoration:underline}
+  .wrap{
+    width:800px;height:600px;padding:4px 6px 6px 6px;background:linear-gradient(180deg,#01070f 0%, #020915 100%);
+  }
+  .title{
+    color:#d6e6ff;font-weight:700;font-size:12px;letter-spacing:.3px;margin-bottom:2px;
+  }
+  .title .brand{color:#91b6ff}
+  .subline{color:var(--muted);margin-bottom:8px}
+  .subline .ok{color:var(--green)}
+  .glossary{margin:2px 0 8px 0;color:#aebfde}
+  .admin{
+    border:1px solid #53330b;border-radius:8px;background:#170d03;padding:10px 12px 10px 12px; margin-bottom:10px;
+    box-shadow: inset 0 0 0 1px rgba(255,180,60,.05);
+  }
+  .admin .head{color:#efb24d;font-weight:700;margin-bottom:10px}
+  .admin .line{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+  .admin .label{color:#9ba9be;margin-right:4px}
+  .chip,.btn{
+    appearance:none;border:1px solid #566a89;border-radius:6px;background:linear-gradient(180deg,#304663,#24364f);color:#f2f6ff;
+    padding:4px 10px;font:inherit;cursor:pointer;box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
+  }
+  .chip.active,.btn.active{background:linear-gradient(180deg,#38537a,#2b4162);border-color:#88a3cf}
+  .btn.green{background:linear-gradient(180deg,#1f5a37,#154529);border-color:#4d8d66;color:#e6ffe9}
+  .main{display:grid;grid-template-columns: 42% 58%;gap:14px;height:430px}
+  .section-title{color:#8da4c6;letter-spacing:.6px;margin:8px 0 6px 0;text-transform:uppercase;font-size:11px}
+  table{width:100%;border-collapse:collapse;font-size:11px}
+  thead th{
+    color:#a8bad8;font-weight:400;text-align:left;padding:4px 6px 6px 6px;border-bottom:1px solid var(--line2);
+  }
+  tbody td{padding:3px 6px;border-bottom:1px solid #102138;color:#eff5ff;white-space:nowrap}
+  tbody tr{background:transparent}
+  tbody tr.active{background:var(--row-hi)}
+  tbody tr.flash{animation:flashRow 1s ease}
+  @keyframes flashRow{0%{background:#25385a}100%{background:transparent}}
+  .device-link{color:#dbe6ff;text-decoration:underline;cursor:pointer;font-weight:700}
+  .yes{color:var(--green);font-weight:700}
+  .pass-pill{
+    display:inline-block;padding:1px 8px;border-radius:999px;background:#0e4b2a;color:#e6ffe8;font-weight:700;font-size:10px;
+  }
+  .fail-pill{display:inline-block;padding:1px 8px;border-radius:999px;background:#5a1a1f;color:#ffe6e8;font-weight:700;font-size:10px}
+  .sim{color:#f0bf60}
+  .recent-wrap{height:290px;overflow:hidden;border-top:1px solid transparent}
+  .left-col{display:flex;flex-direction:column;height:100%}
+  .right-col{display:flex;flex-direction:column;height:100%;overflow:hidden}
+  .inspector-summary,.card{
+    background:rgba(6,13,24,.6);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:8px;
+  }
+  .inspector-summary{padding:10px 12px 9px}
+  .sum-title{font-size:12px;margin-bottom:4px}
+  .sum-title .device{color:#b7ccff;font-weight:700}
+  .sum-title .status{margin-left:6px}
+  .muted{color:var(--muted)}
+  .card .card-title{color:#9db0cf;font-size:11px;margin-bottom:5px}
+  .card table td{padding:1px 0 1px 0;border:none;vertical-align:top;white-space:normal}
+  .card table td:first-child{width:116px;color:#9eb4d3;text-decoration:underline;padding-right:8px}
+  .card table td:last-child{color:#eff6ff;word-break:break-all}
+  .loc-note{color:#b9c9e2}
+  .status.ok{color:var(--green)}
+  .status.bad{color:var(--red)}
+  .inline-status{display:inline-block;margin-left:5px}
+  .footer-note{position:absolute;left:-9999px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="title"><span class="brand">TESSERACTON</span> — live attestation</div>
+  <div class="subline"><span id="ledgerCount">ledger: 887 entries</span> · <span id="headHash">head 8b765c43a9b4</span> · chain <span class="ok">OK</span> · anchor match</div>
+  <div class="glossary"><a href="#">≡ glossary</a> · click any <a href="#">underlined term</a> for a plain-language definition</div>
+
+  <div class="admin">
+    <div class="head">DEMO ADMIN — pick a device, inject a failure, watch it get caught</div>
+    <div class="line"><span class="label">device:</span>
+      <button class="chip active" data-device="amd-mi300x">amd-mi300x</button>
+      <button class="chip" data-device="nvidia-h100">nvidia-h100</button>
+      <button class="chip" data-device="other-tpm">other-tpm</button>
+    </div>
+    <div class="line">
+      <button class="btn" data-action="tamper">Tamper firmware</button>
+      <button class="btn" data-action="forge">Forge report</button>
+      <button class="btn" data-action="replay">Replay old report</button>
+      <button class="btn" data-action="silence">Silence device</button>
+    </div>
+    <div class="line" style="margin-bottom:0">
+      <button class="btn" data-action="shrink">Shrink fence (wrong region)</button>
+      <button class="btn" data-action="edit">Edit the ledger</button>
+      <button class="btn green" id="restoreAll">Restore all</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="left-col">
+      <div class="section-title">LIVE DEVICES (CLICK A NAME FOR ITS ROOT OF TRUST)</div>
+      <table>
+        <thead>
+          <tr><th>device</th><th>auth</th><th>fresh</th><th>compl</th><th>loc</th><th>verdict</th><th>root</th></tr>
+        </thead>
+        <tbody id="deviceBody"></tbody>
+      </table>
+
+      <div class="section-title" style="margin-top:10px">RECENT ROUNDS (CLICK TO INSPECT)</div>
+      <div class="recent-wrap">
+        <table>
+          <thead>
+            <tr><th style="width:52px">#</th><th style="width:92px">time</th><th>device</th><th style="width:68px">verdict</th></tr>
+          </thead>
+          <tbody id="roundsBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="right-col">
+      <div class="section-title">INSPECTOR</div>
+      <div class="inspector-summary">
+        <div class="sum-title" id="summaryTitle">Round #873 · <span class="device">nvidia-h100</span> <span class="status inline-status pass-pill">PASS</span></div>
+        <div class="muted" id="summarySub">scenario live · 6:59:26 PM · 178.156.251.17 (178.156.251.17)</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title" id="authTitle">authentic — OK</div>
+        <table><tbody id="authTable"></tbody></table>
+      </div>
+      <div class="card">
+        <div class="card-title" id="complTitle">compliant — OK</div>
+        <table><tbody id="complTable"></tbody></table>
+      </div>
+      <div class="card">
+        <div class="card-title" id="freshTitle">fresh — OK</div>
+        <table><tbody id="freshTable"></tbody></table>
+      </div>
+      <div class="card" style="flex:1 1 auto; min-height:0">
+        <div class="card-title" id="locTitle">located — OK</div>
+        <table><tbody id="locTable"></tbody></table>
+      </div>
+      <div class="card" style="margin-bottom:0">
+        <div class="card-title" id="chainTitle">chain link — OK</div>
+        <table><tbody id="chainTable"></tbody></table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const $ = sel => document.querySelector(sel);
+  const $$ = sel => Array.from(document.querySelectorAll(sel));
+
+  const deviceMeta = {
+    'amd-mi300x': {ip:'18.175.221.44', instance:'18.175.221.44', loc:'Ashburn, US (ash)', nearest:'US ~72.8 km', usSig:'0.438 ms → 71.1 km (in fence)', sgSig:'218.991 ms → 32841.8 km (outside)'},
+    'nvidia-h100': {ip:'178.156.251.17', instance:'178.156.251.17', loc:'Ashburn, US (ash)', nearest:'US ~74.2 km', usSig:'0.495 ms → 74.2 km (in fence)', sgSig:'217.343 ms → 32578.8 km (outside)'},
+    'other-tpm': {ip:'178.104.250.57', instance:'178.104.250.57', loc:'Frankfurt, DE (fra)', nearest:'DE ~41.8 km', usSig:'94.102 ms → 14311.3 km (outside)', sgSig:'165.220 ms → 24781.6 km (outside)'}
+  };
+
+  const devices = [
+    {name:'amd-mi300x', root:'sim', auth:true, fresh:true, compl:true, loc:true, tamper:false},
+    {name:'nvidia-h100', root:'sim', auth:true, fresh:true, compl:true, loc:true, tamper:false},
+    {name:'other-tpm', root:'sim', auth:true, fresh:true, compl:true, loc:true, tamper:false}
+  ];
+
+  let selectedAdminDevice = 'amd-mi300x';
+  let currentRound = 886;
+  let ledgerCount = 887;
+  let highlightedRound = 873;
+  const rounds = [];
+
+  function randHex(len){
+    const chars = '0123456789abcdef';
+    let out = '';
+    for(let i=0;i<len;i++) out += chars[Math.floor(Math.random()*chars.length)];
+    return out;
+  }
+
+  function timeStringFromOffset(secOffset){
+    const d = new Date(Date.now() - secOffset*1000);
+    return d.toLocaleTimeString('en-US', {hour12:true});
+  }
+
+  function passFail(device){
+    const good = !(device.tamper || !device.auth || !device.fresh || !device.compl || !device.loc);
+    return good ? 'PASS' : 'FAIL';
+  }
+
+  function seedRounds(){
+    const baseDevices = ['other-tpm','nvidia-h100','amd-mi300x'];
+    for(let i=0;i<27;i++){
+      const num = currentRound - i;
+      const dev = baseDevices[i % baseDevices.length];
+      rounds.push(makeRound(num, dev, i*2 + Math.floor(Math.random()*2), 'PASS'));
+    }
+  }
+
+  function makeRound(num, deviceName, secondsAgo, forcedVerdict){
+    const meta = deviceMeta[deviceName];
+    const device = devices.find(d => d.name===deviceName);
+    const verdict = forcedVerdict || passFail(device);
+    const nonce = randHex(32);
+    const measure = randHex(40);
+    const pkey = randHex(64) + randHex(40);
+    const sigA = randHex(48);
+    const sigB = randHex(72);
+    const prev = randHex(64);
+    const stored = randHex(64);
+    return {
+      round:num,
+      time:timeStringFromOffset(secondsAgo),
+      device:deviceName,
+      verdict,
+      scenario: device.tamper ? 'scenario injected' : 'scenario live',
+      ip:meta.ip,
+      authentic:{
+        question:'did a genuine chip sign this report?',
+        device:deviceName,
+        public_key:pkey,
+        signed_bytes:'toy-gpu|' + deviceName + '|' + sigA + '|' + nonce,
+        signature:sigB,
+        verified: verdict==='PASS' ? 'true' : (device.auth ? 'true' : 'false')
+      },
+      compliant:{
+        question:'does the firmware measurement match the golden value?',
+        measured: device.compl ? measure : randHex(40),
+        golden: measure,
+        match: device.compl ? 'true' : 'false'
+      },
+      fresh:{
+        question:'is this answer bound to the current challenge?',
+        nonce: nonce,
+        recorded_fresh: device.fresh ? 'true' : 'false',
+        note:'freshness is decided against the live issued/consumed nonce table at verdict time'
+      },
+      located:{
+        STATED_location: meta.loc,
+        device_instance: meta.instance,
+        device_ip: meta.ip,
+        COMPUTED_nearest: meta.nearest,
+        fence_km: device.loc ? '3000' : '150',
+        DE_bound: device.loc ? '97.042 ms → 14546.2 km (outside)' : '1.201 ms → 181.4 km (outside)',
+        DE_sigs: 'landmark ok · device ok',
+        US_bound: meta.usSig,
+        US_sigs: 'landmark ok · device ok',
+        SG_bound: meta.sgSig,
+        SG_sigs: 'landmark ok · device ok',
+        note: 'STATED is the device\'s own claim (untrusted, from the operator\'s agent). COMPUTED bounds are physics from the landmark pings (trusted).'
+      },
+      chain:{
+        prev: prev,
+        hash_stored: stored,
+        recomputed: device.tamper ? randHex(64) : stored,
+        intact: device.tamper ? 'false' : 'true'
+      }
+    };
+  }
+
+  function renderDevices(){
+    const body = $('#deviceBody');
+    body.innerHTML = devices.map(d => {
+      const verdict = passFail(d);
+      return `<tr>
+        <td><span class="device-link" data-device-link="${d.name}">${d.name}</span></td>
+        <td class="${d.auth ? 'yes':'status bad'}">${d.auth ? 'yes':'no'}</td>
+        <td class="${d.fresh ? 'yes':'status bad'}">${d.fresh ? 'yes':'no'}</td>
+        <td class="${d.compl ? 'yes':'status bad'}">${d.compl ? 'yes':'no'}</td>
+        <td class="${d.loc ? 'yes':'status bad'}">${d.loc ? 'yes':'no'}</td>
+        <td>${verdict==='PASS' ? '<span class="pass-pill">PASS</span>' : '<span class="fail-pill">FAIL</span>'}</td>
+        <td class="sim">${d.root}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  function renderRounds(flashNew = false){
+    const body = $('#roundsBody');
+    body.innerHTML = rounds.slice(0,27).map((r, idx) => {
+      const classes = [r.round === highlightedRound ? 'active' : '', flashNew && idx===0 ? 'flash' : ''].join(' ').trim();
+      return `<tr class="${classes}" data-round="${r.round}">
+        <td>#${r.round}</td>
+        <td>${r.time}</td>
+        <td>${r.device}</td>
+        <td>${r.verdict==='PASS' ? '<span class="pass-pill">PASS</span>' : '<span class="fail-pill">FAIL</span>'}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  function kvRows(obj){
+    return Object.entries(obj).map(([k,v]) => `<tr><td>${k.replace(/_/g,' ')}</td><td>${v}</td></tr>`).join('');
+  }
+
+  function setInspector(roundNum){
+    const round = rounds.find(r => r.round == roundNum) || rounds[0];
+    if(!round) return;
+    highlightedRound = round.round;
+    $('#summaryTitle').innerHTML = `Round #${round.round} · <span class="device">${round.device}</span> ${round.verdict==='PASS' ? '<span class="status inline-status pass-pill">PASS</span>' : '<span class="status inline-status fail-pill">FAIL</span>'}`;
+    $('#summarySub').textContent = `${round.scenario} · ${round.time} · ${round.ip} (${round.ip})`;
+    $('#authTitle').textContent = `authentic — ${round.authentic.verified === 'true' ? 'OK' : 'FAIL'}`;
+    $('#complTitle').textContent = `compliant — ${round.compliant.match === 'true' ? 'OK' : 'FAIL'}`;
+    $('#freshTitle').textContent = `fresh — ${round.fresh.recorded_fresh === 'true' ? 'OK' : 'FAIL'}`;
+    $('#locTitle').textContent = `located — ${round.verdict === 'PASS' || round.located.fence_km==='3000' ? 'OK' : 'FAIL'}`;
+    $('#chainTitle').textContent = `chain link — ${round.chain.intact === 'true' ? 'OK' : 'FAIL'}`;
+    $('#authTable').innerHTML = kvRows(round.authentic);
+    $('#complTable').innerHTML = kvRows(round.compliant);
+    $('#freshTable').innerHTML = kvRows(round.fresh);
+    $('#locTable').innerHTML = kvRows(round.located);
+    $('#chainTable').innerHTML = kvRows(round.chain);
+    renderRounds(false);
+    bindRoundClicks();
+  }
+
+  function updateLedgerHead(){
+    $('#ledgerCount').textContent = `ledger: ${ledgerCount} entries`;
+    $('#headHash').textContent = `head ${randHex(12)}`;
+  }
+
+  function nextDeviceName(){
+    const pattern = ['other-tpm','nvidia-h100','amd-mi300x'];
+    return pattern[currentRound % pattern.length];
+  }
+
+  function addNewRound(){
+    currentRound += 1;
+    ledgerCount += 1;
+    updateLedgerHead();
+    const name = nextDeviceName();
+    const round = makeRound(currentRound, name, 0);
+    rounds.unshift(round);
+    if(rounds.length > 40) rounds.pop();
+    setInspector(round.round);
+    renderRounds(true);
+    bindRoundClicks();
+  }
+
+  function bindRoundClicks(){
+    $$('#roundsBody tr').forEach(tr => tr.onclick = () => setInspector(Number(tr.dataset.round)));
+    $$('[data-device-link]').forEach(el => el.onclick = () => {
+      const found = rounds.find(r => r.device === el.dataset.deviceLink);
+      if(found) setInspector(found.round);
+    });
+  }
+
+  function selectAdminDevice(name){
+    selectedAdminDevice = name;
+    $$('.chip').forEach(b => b.classList.toggle('active', b.dataset.device === name));
+  }
+
+  function injectFailure(action){
+    const d = devices.find(x => x.name === selectedAdminDevice);
+    if(!d) return;
+    if(action === 'tamper'){ d.compl = false; d.tamper = true; }
+    if(action === 'forge'){ d.auth = false; d.tamper = true; }
+    if(action === 'replay'){ d.fresh = false; d.tamper = true; }
+    if(action === 'silence'){ d.fresh = false; d.auth = false; d.tamper = true; }
+    if(action === 'shrink'){ d.loc = false; d.tamper = true; }
+    if(action === 'edit'){ d.tamper = true; }
+    renderDevices();
+    const injected = makeRound(currentRound + 1, d.name, 0, 'FAIL');
+    currentRound += 1;
+    ledgerCount += 1;
+    rounds.unshift(injected);
+    if(rounds.length > 40) rounds.pop();
+    updateLedgerHead();
+    setInspector(injected.round);
+    renderRounds(true);
+    bindRoundClicks();
+  }
+
+  function restoreAll(){
+    devices.forEach(d => { d.auth = true; d.fresh = true; d.compl = true; d.loc = true; d.tamper = false; });
+    renderDevices();
+    ledgerCount += 1;
+    updateLedgerHead();
+  }
+
+  seedRounds();
+  renderDevices();
+  renderRounds();
+  setInspector(873);
+  bindRoundClicks();
+
+  $$('.chip').forEach(btn => btn.addEventListener('click', () => selectAdminDevice(btn.dataset.device)));
+  $$('.btn[data-action]').forEach(btn => btn.addEventListener('click', () => injectFailure(btn.dataset.action)));
+  $('#restoreAll').addEventListener('click', restoreAll);
+
+  setInterval(() => {
+    rounds.forEach((r, idx) => {
+      r.time = timeStringFromOffset((idx+1) * 2);
+    });
+    addNewRound();
+  }, 1000);
+})();
+</script>
+</body>
+</html>

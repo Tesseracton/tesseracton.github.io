@@ -1,0 +1,50 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Tesseracton tesseract icon">
+  <defs>
+    <linearGradient id="edge" x1="0" y1="0" x2="200" y2="200" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#22D3EE"/>
+      <stop offset="0.55" stop-color="#6366F1"/>
+      <stop offset="1" stop-color="#A855F7"/>
+    </linearGradient>
+    <radialGradient id="core" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#A855F7" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#A855F7" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <g fill="none" stroke="url(#edge)" stroke-linejoin="round" stroke-linecap="round">
+    <!-- inner-core glow -->
+    <rect x="70" y="65" width="60" height="55" rx="6" fill="url(#core)" stroke="none"/>
+
+    <!-- hypercube connectors: outer cube -> inner cube -->
+    <g stroke-width="2" opacity="0.55">
+      <line x1="45"  y1="60"  x2="75"  y2="82"/>
+      <line x1="140" y1="60"  x2="118" y2="82"/>
+      <line x1="140" y1="155" x2="118" y2="125"/>
+      <line x1="45"  y1="155" x2="75"  y2="125"/>
+      <line x1="70"  y1="35"  x2="87"  y2="71"/>
+      <line x1="165" y1="35"  x2="129" y2="71"/>
+      <line x1="165" y1="130" x2="129" y2="114"/>
+      <line x1="70"  y1="130" x2="87"  y2="114"/>
+    </g>
+
+    <!-- inner cube -->
+    <g stroke-width="2.5">
+      <polygon points="75,82 118,82 118,125 75,125"/>
+      <polygon points="87,71 129,71 129,114 87,114"/>
+      <line x1="75"  y1="82"  x2="87"  y2="71"/>
+      <line x1="118" y1="82"  x2="129" y2="71"/>
+      <line x1="118" y1="125"  x2="129" y2="114"/>
+      <line x1="75"  y1="125"  x2="87"  y2="114"/>
+    </g>
+
+    <!-- outer cube -->
+    <g stroke-width="3.5">
+      <polygon points="45,60 140,60 140,155 45,155"/>
+      <polygon points="70,35 165,35 165,130 70,130"/>
+      <line x1="45"  y1="60"  x2="70"  y2="35"/>
+      <line x1="140" y1="60"  x2="165" y2="35"/>
+      <line x1="140" y1="155"  x2="165" y2="130"/>
+      <line x1="45"  y1="155"  x2="70"  y2="130"/>
+    </g>
+  </g>
+</svg>

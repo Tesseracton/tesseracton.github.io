@@ -1,0 +1,290 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getCollection, render } from 'astro:content';
+
+// All page copy lives in src/content/sections/*.md. This file only lays out
+// and styles those sections — it holds no marketing text of its own.
+const entries = await getCollection('sections');
+const byId = Object.fromEntries(entries.map((e) => [e.id, e]));
+
+const hero = byId.hero;
+const about = byId.about;
+const product = byId.product;
+const featuresSection = byId.features;
+const evidence = byId.evidence;
+const services = byId.services;
+const getStarted = byId.getstarted;
+const contact = byId.contact;
+
+// Accent-bar colours for the evidence capability cards.
+const accentHex = {
+  teal: '#2DD4BF',
+  blue: '#3B82F6',
+  orange: '#F97316',
+  violet: '#A855F7',
+} as const;
+
+// Line-icon inner markup for the feature tiles (24x24, stroke = currentColor).
+const icons = {
+  activity: '<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>',
+  box: '<path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/>',
+  alert: '<path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
+  server: '<rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/>',
+} as const;
+
+// Prose paragraphs come from each file's markdown body.
+const { Content: HeroBody } = await render(hero);
+const { Content: AboutBody } = await render(about);
+const { Content: ContactBody } = await render(contact);
+
+// Top nav is built from any section that declares a navLabel, in `order`.
+const navItems = entries
+  .filter((e) => e.data.navLabel)
+  .sort((a, b) => a.data.order - b.data.order)
+  .map((e) => ({ label: e.data.navLabel!, href: `#${e.id}` }));
+---
+
+<Layout>
+  <!-- Ambient gradient backdrop -->
+  <div aria-hidden="true" class="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+    <div class="absolute -top-40 left-1/2 h-[40rem] w-[40rem] -translate-x-1/2 rounded-full blur-3xl" style="background: radial-gradient(circle, rgba(245,158,11,0.16), transparent 65%);"></div>
+    <div class="absolute top-1/3 -right-40 h-[32rem] w-[32rem] rounded-full blur-3xl" style="background: radial-gradient(circle, rgba(249,115,22,0.12), transparent 65%);"></div>
+    <div class="absolute bottom-0 -left-40 h-[32rem] w-[32rem] rounded-full blur-3xl" style="background: radial-gradient(circle, rgba(56,189,248,0.12), transparent 65%);"></div>
+  </div>
+
+  <header class="sticky top-0 z-50 border-b border-white/5 bg-[var(--color-ink)]/70 backdrop-blur-md">
+    <nav class="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+      <a href="#top" class="flex items-center gap-3">
+        <img src="/tesseracton-icon.svg" alt="Tesseracton" width="36" height="36" class="h-9 w-9" />
+        <span class="text-lg font-bold tracking-tight text-white">Tesseracton<span class="text-[var(--color-indigo)]">.com</span></span>
+      </a>
+      <div class="hidden items-center gap-8 md:flex">
+        {navItems.map((item) => (
+          <a href={item.href} class="nav-link text-sm font-medium text-[var(--color-mist)] transition-colors hover:text-white">{item.label}</a>
+        ))}
+      </div>
+      <a href="#contact" class="rounded-full bg-gradient-to-r from-[var(--color-cyan)] via-[var(--color-indigo)] to-[var(--color-violet)] px-4 py-2 text-sm font-semibold text-[var(--color-ink)] transition-transform hover:scale-105 shadow-lg shadow-amber-500/20">Get in touch</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <!-- Hero -->
+    <section class="fade-up mx-auto max-w-6xl px-6 pt-20 pb-24 md:pt-28 md:pb-32">
+      <h1 class="hero-gradient text-4xl leading-[1.1] font-extrabold tracking-tight text-white sm:text-5xl md:text-6xl">{hero.data.heading}</h1>
+      <div class="mt-6 max-w-3xl">
+        <p class="hero-gradient text-lg font-semibold md:text-xl">{hero.data.tagline}</p>
+        <div class="prose-body mt-6 max-w-2xl text-[var(--color-mist)]">
+          <HeroBody />
+        </div>
+        <div class="mt-10 flex flex-wrap gap-4">
+          <a href={hero.data.ctaPrimary?.href} class="btn-primary rounded-full bg-gradient-to-r from-[var(--color-cyan)] via-[var(--color-indigo)] to-[var(--color-violet)] px-7 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-500/20 transition-transform hover:scale-105">{hero.data.ctaPrimary?.label}</a>
+          <a href={hero.data.ctaSecondary?.href} class="btn-secondary rounded-full border border-white/15 px-7 py-3 text-sm font-semibold text-white transition-colors hover:border-white/40">{hero.data.ctaSecondary?.label}</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- About -->
+    <section id="about" class="fade-up scroll-mt-20 border-t border-white/5 py-24">
+      <div class="mx-auto grid max-w-6xl gap-12 px-6 md:grid-cols-[1fr_1.6fr]">
+        <div>
+          <p class="text-sm font-semibold tracking-widest text-[var(--color-cyan)] uppercase">{about.data.eyebrow}</p>
+          <h2 class="mt-3 text-3xl font-bold tracking-tight text-white md:text-4xl">{about.data.heading}</h2>
+        </div>
+        <div class="prose-body text-[var(--color-mist)]">
+          <AboutBody />
+        </div>
+      </div>
+    </section>
+
+    <!-- Product -->
+    <section id="product" class="fade-up scroll-mt-20 border-t border-white/5 py-24">
+      <div class="mx-auto max-w-6xl px-6">
+        <div class="max-w-2xl">
+          <p class="text-sm font-semibold tracking-widest text-[var(--color-cyan)] uppercase">{product.data.eyebrow}</p>
+          <h2 class="mt-3 text-3xl font-bold tracking-tight text-white md:text-4xl">{product.data.heading}</h2>
+          <p class="mt-4 text-lg text-[var(--color-mist)]">{product.data.intro}</p>
+        </div>
+        <div class="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {product.data.cards?.map((c) => (
+            <div class="panel rounded-2xl p-6 transition-colors">
+              <h3 class="text-lg font-semibold text-white">{c.title}</h3>
+              <p class="mt-3 text-sm leading-relaxed text-[var(--color-mist)]">{c.body}</p>
+            </div>
+          ))}
+        </div>
+
+        <div class="mt-16">
+          <p class="text-sm font-semibold tracking-widest text-[var(--color-cyan)] uppercase">{product.data.dashboardLabel}</p>
+          <p class="mt-3 mb-6 max-w-2xl text-sm text-[var(--color-mist)]">{product.data.dashboardIntro}</p>
+          <div class="panel rounded-2xl p-4 transition-colors">
+            <iframe src="/tesseracton_live_attestation_dashboard_800x600.html" width="800" height="600" class="mx-auto block w-full max-w-[800px] rounded-xl border border-white/10" title="Tesseracton Live Attestation Dashboard" loading="lazy"></iframe>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features -->
+    <section id="features" class="fade-up scroll-mt-20 border-t border-white/5 py-24">
+      <div class="mx-auto max-w-6xl px-6">
+        <div class="max-w-2xl">
+          <p class="text-sm font-semibold tracking-widest text-[var(--color-cyan)] uppercase">{featuresSection.data.eyebrow}</p>
+          <h2 class="mt-3 text-3xl font-bold tracking-tight text-white md:text-4xl">{featuresSection.data.heading}</h2>
+        </div>
+        <div class="mt-12 grid gap-5 sm:grid-cols-2">
+          {featuresSection.data.features?.map((f) => (
+            <div class="panel rounded-2xl p-8 transition-colors">
+              <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--color-cyan)] via-[var(--color-indigo)] to-[var(--color-violet)] text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" set:html={icons[f.icon]}></svg>
+              </div>
+              <h3 class="mt-5 text-lg font-semibold text-white">{f.title}</h3>
+              <p class="mt-3 text-sm leading-relaxed text-[var(--color-mist)]">{f.body}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- Evidence chain -->
+    <section id="evidence" class="fade-up scroll-mt-20 border-t border-white/5 py-24">
+      <div class="mx-auto max-w-6xl px-6">
+        <div class="max-w-2xl">
+          <p class="text-sm font-semibold tracking-widest text-[var(--color-cyan)] uppercase">{evidence.data.eyebrow}</p>
+          <h2 class="mt-3 text-3xl font-bold tracking-tight text-white md:text-4xl">{evidence.data.heading}</h2>
+          <p class="mt-4 text-lg text-[var(--color-mist)]">{evidence.data.intro}</p>
+        </div>
+        <div class="panel mt-12 rounded-3xl p-8 md:p-10">
+          <h2 class="text-2xl font-bold tracking-tight text-white">{evidence.data.chainTitle}</h2>
+          <div class="mt-8 flex flex-wrap items-center gap-x-2 gap-y-3">
+            {evidence.data.chain?.map((step, i) => (
+              <Fragment>
+                {i > 0 && <span aria-hidden="true" class="text-[var(--color-mist)]">&rarr;</span>}
+                <span class="rounded-xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-semibold text-white">{step}</span>
+              </Fragment>
+            ))}
+          </div>
+        </div>
+
+        <div class="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {evidence.data.pillars?.map((p) => (
+            <div class="panel rounded-2xl p-6 transition-colors">
+              <div class="h-1 w-10 rounded-full" style={`background:${accentHex[p.accent]}`}></div>
+              <h3 class="mt-5 text-lg font-semibold text-white">{p.title}</h3>
+              <p class="mt-3 text-sm leading-relaxed text-[var(--color-mist)]">{p.body}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- Services -->
+    <section id="services" class="fade-up scroll-mt-20 border-t border-white/5 py-24">
+      <div class="mx-auto max-w-6xl px-6">
+        <div class="max-w-2xl">
+          <p class="text-sm font-semibold tracking-widest text-[var(--color-cyan)] uppercase">{services.data.eyebrow}</p>
+          <h2 class="mt-3 text-3xl font-bold tracking-tight text-white md:text-4xl">{services.data.heading}</h2>
+          <p class="mt-4 text-lg text-[var(--color-mist)]">{services.data.intro}</p>
+        </div>
+        <div class="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {services.data.cards?.map((c) => (
+            <div class="panel rounded-2xl p-6 transition-colors">
+              <h3 class="text-lg font-semibold text-white">{c.title}</h3>
+              <p class="mt-3 text-sm leading-relaxed text-[var(--color-mist)]">{c.body}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- Get Started -->
+    <section id="get-started" class="fade-up scroll-mt-20 border-t border-white/5 py-24">
+      <div class="mx-auto max-w-4xl px-6 text-center">
+        <p class="text-sm font-semibold tracking-widest text-[var(--color-cyan)] uppercase">{getStarted.data.eyebrow}</p>
+        <h2 class="mt-3 text-3xl font-bold tracking-tight text-white md:text-4xl">{getStarted.data.heading}</h2>
+        <p class="mx-auto mt-4 max-w-2xl text-lg text-[var(--color-mist)]">{getStarted.data.intro}</p>
+        <a href={getStarted.data.ctaPrimary?.href} class="btn-primary mt-8 inline-block rounded-full bg-gradient-to-r from-[var(--color-cyan)] via-[var(--color-indigo)] to-[var(--color-violet)] px-8 py-3.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/20 transition-transform hover:scale-105">{getStarted.data.ctaPrimary?.label}</a>
+      </div>
+    </section>
+
+    <!-- Contact -->
+    <section id="contact" class="fade-up scroll-mt-20 border-t border-white/5 py-24">
+      <div class="mx-auto max-w-4xl px-6">
+        <div class="panel relative overflow-hidden rounded-3xl px-8 py-14 text-center md:px-16">
+          <p class="text-sm font-semibold tracking-widest text-[var(--color-cyan)] uppercase">{contact.data.eyebrow}</p>
+          <div class="prose-body mx-auto mt-5 max-w-xl text-[var(--color-mist)] [&_p]:mx-auto">
+            <ContactBody />
+          </div>
+          <a href={`mailto:${contact.data.email}`} class="btn-primary mt-8 inline-block rounded-full bg-gradient-to-r from-[var(--color-cyan)] via-[var(--color-indigo)] to-[var(--color-violet)] px-8 py-3.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/20 transition-transform hover:scale-105">{contact.data.emailButton}</a>
+          <p class="mt-5 text-sm text-[var(--color-mist)]">
+            or email <a href={`mailto:${contact.data.email}`} class="text-[var(--color-cyan)] underline underline-offset-4">{contact.data.email}</a>
+          </p>
+
+          <div class="mx-auto mt-12 max-w-md border-t border-white/5 pt-10">
+            <p class="text-sm font-semibold tracking-widest text-[var(--color-cyan)] uppercase">{contact.data.newsletter?.eyebrow}</p>
+            <h3 class="mt-3 text-xl font-bold tracking-tight text-white">{contact.data.newsletter?.heading}</h3>
+            <p class="mx-auto mt-3 max-w-sm text-sm text-[var(--color-mist)]">{contact.data.newsletter?.blurb}</p>
+            <form id="newsletter-form" action="https://formspree.io/newsletter@tesseracton.com" method="POST" class="mt-6 flex flex-col gap-3 sm:flex-row">
+              <label for="newsletter-email" class="sr-only">Email address</label>
+              <input id="newsletter-email" name="email" type="email" required autocomplete="email" placeholder={contact.data.newsletter?.placeholder} class="w-full flex-1 rounded-full border border-white/15 bg-white/5 px-5 py-3 text-sm text-white placeholder:text-[var(--color-mist)] focus:border-[var(--color-cyan)] focus:outline-none" />
+              <button type="submit" class="btn-primary shrink-0 rounded-full bg-gradient-to-r from-[var(--color-cyan)] via-[var(--color-indigo)] to-[var(--color-violet)] px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-500/20 transition-transform hover:scale-105">{contact.data.newsletter?.button}</button>
+            </form>
+            <p id="newsletter-status" class="mt-3 hidden text-sm text-[var(--color-cyan)]" role="status" aria-live="polite"></p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="border-t border-white/5 py-10">
+    <div class="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-6 sm:flex-row">
+      <div class="flex items-center gap-3">
+        <img src="/tesseracton-icon.svg" alt="" width="28" height="28" class="h-7 w-7 opacity-80" />
+        <span class="text-sm text-[var(--color-mist)]">&copy; 2026 Tesseracton.com — Compliance Grid</span>
+      </div>
+      <a href="#contact" class="text-sm font-medium text-[var(--color-mist)] transition-colors hover:text-white">hello@tesseracton.com</a>
+    </div>
+  </footer>
+
+  <button id="backToTop" class="back-to-top rounded-full bg-white/10 p-3 text-white backdrop-blur-md border border-white/10 hover:bg-white/20" aria-label="Back to top">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></svg>
+  </button>
+
+  <script src="/main.js" is:inline></script>
+
+  <script>
+    // Newsletter signups POST to Formspree via fetch so the visitor stays on the
+    // page and gets an inline confirmation instead of a redirect.
+    const form = document.getElementById('newsletter-form') as HTMLFormElement | null;
+    const status = document.getElementById('newsletter-status');
+    const button = form?.querySelector('button[type="submit"]') as HTMLButtonElement | null;
+
+    form?.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      if (!status) return;
+
+      if (button) button.disabled = true;
+      status.classList.remove('hidden');
+      status.textContent = 'Subscribing…';
+
+      try {
+        const response = await fetch(form.action, {
+          method: 'POST',
+          body: new FormData(form),
+          headers: { Accept: 'application/json' },
+        });
+        if (response.ok) {
+          form.reset();
+          status.textContent = "Thanks — you're on the list.";
+        } else {
+          const data = await response.json().catch(() => null);
+          status.textContent =
+            data?.errors?.map((e: { message: string }) => e.message).join(', ') ??
+            'Something went wrong. Please try again.';
+        }
+      } catch {
+        status.textContent = 'Network error. Please try again.';
+      } finally {
+        if (button) button.disabled = false;
+      }
+    });
+  </script>
+</Layout>
